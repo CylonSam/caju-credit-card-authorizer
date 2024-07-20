@@ -5,6 +5,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -20,6 +21,13 @@ class TestcontainersConfiguration {
         container.start();
         initializeDatabase(container);
         return container;
+    }
+
+    @Bean
+    @ServiceConnection(name = "redis")
+    GenericContainer redisContainer() {
+        return new GenericContainer(DockerImageName.parse("redis:alpine"))
+                .withExposedPorts(6379);
     }
 
     private void initializeDatabase(PostgreSQLContainer<?> container) {

@@ -6,9 +6,9 @@ import io.cylonsam.cajucreditcardauthorizer.core.domain.Account;
 import io.cylonsam.cajucreditcardauthorizer.core.domain.AuthorizationTransaction;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import lombok.Getter;
+import org.hibernate.validator.constraints.Length;
 
 @Builder
 @Getter
@@ -18,7 +18,7 @@ public class AuthorizationRequestDTO {
     private String account;
     @JsonProperty("totalAmount") @NotNull
     private Double totalAmount;
-    @JsonProperty("mcc") @NotBlank @Positive
+    @JsonProperty("mcc") @NotBlank @Length(min = 4, max = 4)
     private String mcc;
     @JsonProperty("merchant") @NotBlank
     private String merchant;

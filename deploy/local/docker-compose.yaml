@@ -24,6 +24,10 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
       - ./deploy/local/init.sql:/docker-entrypoint-initdb.d/init.sql
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
 
 volumes:
   db-data:

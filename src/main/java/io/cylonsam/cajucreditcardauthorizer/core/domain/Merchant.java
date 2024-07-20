@@ -1,33 +1,30 @@
 package io.cylonsam.cajucreditcardauthorizer.core.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "transactions")
+@Table(name = "merchants")
+@Data
 @Builder
-@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthorizationTransaction {
+public class Merchant {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id")
-    private Account account;
-
-    private double amount;
-
-    @Setter
+    @NotBlank
+    private String name;
+    @NotBlank
     private String mcc;
-
-    private String merchant;
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -36,8 +33,4 @@ public class AuthorizationTransaction {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    public String getAccountId() {
-        return account.getId();
-    }
 }

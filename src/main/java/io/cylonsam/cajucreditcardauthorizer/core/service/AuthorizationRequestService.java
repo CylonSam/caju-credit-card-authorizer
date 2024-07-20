@@ -1,11 +1,11 @@
 package io.cylonsam.cajucreditcardauthorizer.core.service;
 
-import io.cylonsam.cajucreditcardauthorizer.core.domain.Account;
-import io.cylonsam.cajucreditcardauthorizer.core.domain.AuthorizationTransaction;
-import io.cylonsam.cajucreditcardauthorizer.core.domain.TransactionClassification;
+import io.cylonsam.cajucreditcardauthorizer.core.domain.*;
 import io.cylonsam.cajucreditcardauthorizer.core.exception.InsufficientBalanceException;
+import io.cylonsam.cajucreditcardauthorizer.core.exception.UnprocessableRequestException;
 import io.cylonsam.cajucreditcardauthorizer.infra.repository.AccountRepository;
 import io.cylonsam.cajucreditcardauthorizer.infra.repository.AuthorizationTransactionRepository;
+import io.cylonsam.cajucreditcardauthorizer.infra.repository.MerchantRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -14,28 +14,43 @@ import static io.cylonsam.cajucreditcardauthorizer.core.domain.TransactionClassi
 import static io.cylonsam.cajucreditcardauthorizer.core.domain.TransactionClassification.getClassification;
 
 @Service
-public class ProcessAuthorizationRequestService {
+public class AuthorizationRequestService {
     private final AccountRepository accountRepository;
     private final AuthorizationTransactionRepository transactionRepository;
+    private final MerchantRepository merchantRepository;
+    private final LockAccountService lockAccountService;
 
-    public ProcessAuthorizationRequestService(final AccountRepository accountRepository,
-                                              final AuthorizationTransactionRepository transactionRepository) {
+    public AuthorizationRequestService(final AccountRepository accountRepository,
+                                       final AuthorizationTransactionRepository transactionRepository,
+                                       final MerchantRepository merchantRepository,
+                                       final LockAccountService lockAccountService) {
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
+        this.merchantRepository = merchantRepository;
+        this.lockAccountService = lockAccountService;
     }
 
     public void process(final AuthorizationTransaction authorizationTransaction) {
-        System.out.println("Processing authorization request: " + authorizationTransaction);
+        final String accountId = authorizationTransaction.getAccountId();
 
-        final Optional<Account> transactionAccount = accountRepository.findById(authorizationTransaction.getAccountId());
+        final Optional<Account> transactionAccount = accountRepository.findById(accountId);
         if (transactionAccount.isEmpty()) {
-            throw new IllegalArgumentException("Account %s not found".formatted(authorizationTransaction.getAccountId()));
+            throw new UnprocessableRequestException("Account %s not found".formatted(accountId));
         }
+        if (lockAccountService.getAccountLockStatus(accountId).isPresent()) {
+            throw new UnprocessableRequestException("Account %s is processing another request".formatted(accountId));
+        }
+        lockAccountService.lockAccount(authorizationTransaction.getAccountId());
+
+        final String finalMcc = getMcc(authorizationTransaction);
+        authorizationTransaction.setMcc(finalMcc);
 
         final Account updatedAccount = debitAccount(transactionAccount.get(), authorizationTransaction);
 
         accountRepository.save(updatedAccount);
         transactionRepository.save(createTransaction(updatedAccount, authorizationTransaction));
+
+        lockAccountService.unlockAccount(authorizationTransaction.getAccountId());
     }
 
     private Account debitAccount(final Account account, final AuthorizationTransaction authorizationTransaction) {
@@ -68,4 +83,13 @@ public class ProcessAuthorizationRequestService {
                 .merchant(authorizationTransaction.getMerchant())
                 .build();
     }
+
+    private String getMcc(final AuthorizationTransaction authorizationTransaction) {
+        final Optional<Merchant> merchant = merchantRepository.findByName(authorizationTransaction.getMerchant().toUpperCase());
+
+        return merchant.isPresent() ? merchant.get().getMcc() : authorizationTransaction.getMcc();
+    }
+
+
+
 }

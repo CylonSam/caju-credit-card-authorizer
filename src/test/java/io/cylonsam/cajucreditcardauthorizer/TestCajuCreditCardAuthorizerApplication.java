@@ -1,7 +1,9 @@
 package io.cylonsam.cajucreditcardauthorizer;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.test.context.ActiveProfiles;
 
+@ActiveProfiles("test")
 public class TestCajuCreditCardAuthorizerApplication {
 
     public static void main(String[] args) {
