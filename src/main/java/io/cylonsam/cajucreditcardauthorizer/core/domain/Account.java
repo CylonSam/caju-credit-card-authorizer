@@ -8,6 +8,7 @@ import java.util.List;
 @Entity
 @Table(name = "accounts")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Account {
@@ -15,24 +16,35 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "transactions")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "account")
     private List<AuthorizationTransaction> authorizationTransaction;
 
     @Column(name = "food_balance")
-    private Double foodBalance;
+    private double foodBalance;
 
     @Column(name = "cash_balance")
-    private Double cashBalance;
+    private double cashBalance;
 
     @Column(name = "meal_balance")
-    private Double mealBalance;
+    private double mealBalance;
 
     public Account(final String id) {
         this.id = id;
+    }
+
+    public Double getBalanceByClassification(final TransactionClassification transactionClassification) {
+        return switch (transactionClassification) {
+            case FOOD -> this.foodBalance;
+            case MEAL -> this.mealBalance;
+            case CASH -> this.cashBalance;
+        };
+    }
+
+    public void setBalanceByClassification(final TransactionClassification transactionClassification, final double balance) {
+        switch (transactionClassification) {
+            case FOOD -> this.foodBalance = balance;
+            case MEAL -> this.mealBalance = balance;
+            case CASH -> this.cashBalance = balance;
+        }
     }
 }
