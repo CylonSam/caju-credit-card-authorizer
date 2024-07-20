@@ -3,14 +3,14 @@ services:
   caju-credit-card-authorizer:
     image: caju-credit-card-authorizer
     build:
-      context: .
+      context: ../..
       dockerfile: Dockerfile
     ports:
       - 8080:8080
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_URL=jdbc:postgresql://postgres:5432/postgres
+      - POSTGRES_URL=jdbc:postgresql://postgres:5432/postgres?currentSchema=caju_credit_card_authorizer
     depends_on:
       - postgres
   postgres:
@@ -21,3 +21,9 @@ services:
       - POSTGRES_DB=postgres
     ports:
       - 5432:5432
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./deploy/local/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  db-data:
