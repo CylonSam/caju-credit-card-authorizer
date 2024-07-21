@@ -16,7 +16,7 @@ Ver requisitos do projeto nesse [link.](https://caju.notion.site/Desafio-T-cnico
 ## Como rodar projeto localmente
 1. Clone o repositório `git clone https://github.com/cylonsam/caju-credit-card-authorizer.git`
 2. Faça o build do projeto `mvn clean package`
-3. Rode o docker-compose dentro de ./deploy/local `docker-compose -f ./deploy/local/docker-compose.yml up -d`
+3. Rode o docker-compose dentro de ./deploy/local `docker-compose -f ./deploy/local/docker-compose.yaml up -d`
 4. Acesse o projeto em http://localhost:8080
 
 Obs. 1: O projeto utiliza as portas 8080 e 5432 para a aplicação e o PostgreSQL, respectivamente. 
