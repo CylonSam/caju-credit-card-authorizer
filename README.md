@@ -27,6 +27,8 @@ Os detalhes dessa account podem ser vistos no arquivo init.sql dentro do diretó
 
 ## API
 
+A aplicação possui swagger disponível em http://localhost:8080/swagger-ui.html
+
 ### POST /authorize
 Endpoint para autorizar o uso do cartão de crédito de acordo com algum MCC.
 
