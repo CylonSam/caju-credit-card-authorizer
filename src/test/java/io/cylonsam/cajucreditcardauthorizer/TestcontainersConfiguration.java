@@ -40,13 +40,5 @@ class TestcontainersConfiguration {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
         jdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS caju_credit_card_authorizer;");
-        jdbcTemplate.execute("""
-            CREATE TABLE IF NOT EXISTS caju_credit_card_authorizer.accounts (
-                id UUID PRIMARY KEY,
-                food_balance DOUBLE PRECISION,
-                cash_balance DOUBLE PRECISION,
-                meal_balance DOUBLE PRECISION
-            );
-        """);
     }
 }

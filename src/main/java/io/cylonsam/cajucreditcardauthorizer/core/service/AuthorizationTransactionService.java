@@ -36,8 +36,8 @@ public class AuthorizationTransactionService {
         log.info("Processing transaction for account {}", authorizationTransaction.getAccountId());
         final String accountId = authorizationTransaction.getAccountId();
 
-        final Optional<Account> transactionAccount = accountRepository.findById(accountId);
-        if (transactionAccount.isEmpty()) {
+        final Optional<Account> account = accountRepository.findById(accountId);
+        if (account.isEmpty()) {
             log.warn("Account {} not found", accountId);
             throw new UnprocessableRequestException("Account %s not found".formatted(accountId));
         }
@@ -47,10 +47,10 @@ public class AuthorizationTransactionService {
         }
         lockAccountService.lockAccount(authorizationTransaction.getAccountId());
 
-        final String finalMcc = getMcc(authorizationTransaction);
-        authorizationTransaction.setMcc(finalMcc);
+        final String correctedTransactionMcc = getMcc(authorizationTransaction);
+        authorizationTransaction.setMcc(correctedTransactionMcc);
 
-        final Account updatedAccount = debitAccount(transactionAccount.get(), authorizationTransaction);
+        final Account updatedAccount = debitAccount(account.get(), authorizationTransaction);
 
         accountRepository.save(updatedAccount);
         transactionRepository.save(createTransaction(updatedAccount, authorizationTransaction));
@@ -96,7 +96,4 @@ public class AuthorizationTransactionService {
 
         return merchant.isPresent() ? merchant.get().getMcc() : authorizationTransaction.getMcc();
     }
-
-
-
 }

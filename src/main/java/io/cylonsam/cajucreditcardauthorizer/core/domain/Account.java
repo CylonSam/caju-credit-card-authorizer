@@ -17,7 +17,7 @@ public class Account {
     private String id;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "account")
-    private List<AuthorizationTransaction> authorizationTransaction;
+    private List<AuthorizationTransaction> transactions;
 
     @Column(name = "food_balance")
     private double foodBalance;
