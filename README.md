@@ -34,7 +34,7 @@ Endpoint para autorizar o uso do cartão de crédito de acordo com algum MCC.
 ```json
 {
   "account": "string",
-  "totalAmount": "number"
+  "totalAmount": "number",
   "mcc": "string",
   "merchant": "string"
 }
@@ -101,15 +101,109 @@ curl -X POST \
 
 #### Response
 
-- Merchant associado com sucesso (status code 201)
-```json
-{
-  "code": "00"
-}
-```
+- Merchant associado com sucesso (`status code 201`)
 
-- Erro (status code 200)
+- Erro (``status code 200``)
 ```json
 {
   "code": "07"
 }
+```
+
+### PUT /merchant/{id}
+
+Endpoint para atualizar o mcc de um merchant.
+
+#### Payload
+```json
+{
+  "mcc": "string"
+}
+```
+
+#### CURL da requisição
+```bash
+curl -X PUT \
+  http://localhost:8080/merchant/1 \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "mcc": "5811"
+}
+```
+
+#### Response
+
+- Merchant atualizado com sucesso (``status code 200``)
+
+- Erro (``status code 200``)
+```json
+{
+  "code": "07"
+}
+```
+
+### DELETE /merchant/{id}
+
+Endpoint para remover um merchant.
+
+#### CURL da requisição
+```bash
+curl -X DELETE \
+  http://localhost:8080/merchant/1 \
+  -H 'Content-Type: application/json'
+```
+
+#### Response
+
+- Merchant removido com sucesso (``status code 200``)
+
+- Erro (``status code 200``)
+```json
+{
+  "code": "07"
+}
+```
+
+### GET /merchant
+
+Endpoint para obter todos os merchants.
+
+#### CURL da requisição
+```bash
+curl -X GET \
+  http://localhost:8080/merchant \
+  -H 'Content-Type: application/json'
+```
+
+#### Response
+
+- Merchants obtidos com sucesso (``status code 200``)
+
+- Erro (``status code 200``)
+```json
+{
+  "code": "07"
+}
+```
+
+### GET /merchant?name={string}
+
+Endpoint para obter um merchant pelo nome.
+
+#### CURL da requisição
+```bash
+curl -X GET \
+  http://localhost:8080/merchant?name=PADARIA%20DO%20ZE%20SAO%20PAULO%20BR \
+  -H 'Content-Type: application/json'
+```
+
+#### Response
+
+- Merchant obtido com sucesso (``status code 200``)
+
+- Erro (``status code 200``)
+```json
+{
+  "code": "07"
+}
+```

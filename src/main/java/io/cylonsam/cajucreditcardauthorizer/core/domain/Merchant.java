@@ -21,8 +21,11 @@ public class Merchant {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+
+    @Column(unique = true)
     @NotBlank
     private String name;
+
     @NotBlank
     private String mcc;
 

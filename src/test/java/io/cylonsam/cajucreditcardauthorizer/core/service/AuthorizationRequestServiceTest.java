@@ -33,6 +33,20 @@ class AuthorizationRequestServiceTest {
         this.authorizationRequestService = new AuthorizationRequestService(accountRepository, authorizationTransactionRepository, merchantRepository, lockAccountService);
     }
 
+    @Test
+    void shouldThrowUnprocessableRequestExceptionWhenAccountIsNotFound() {
+        // Given account is not found
+        final AuthorizationTransaction transaction = AuthorizationTransaction.builder()
+                .account(Account.builder().id("1").build())
+                .amount(100.0)
+                .mcc("5411")
+                .merchant("PADARIA DO ZE               SAO PAULO BR")
+                .build();
+
+        when(accountRepository.findById("1")).thenReturn(Optional.empty());
+        // Should throw unprocessable request exception
+        assertThrows(UnprocessableRequestException.class, () -> authorizationRequestService.process(transaction));
+    }
 
     @Test
     void shouldLockAccountWhenProcessIsCalled() {
