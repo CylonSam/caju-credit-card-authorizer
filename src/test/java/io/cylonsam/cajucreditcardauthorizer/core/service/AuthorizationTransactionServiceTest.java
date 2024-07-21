@@ -17,20 +17,20 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-class AuthorizationRequestServiceTest {
+class AuthorizationTransactionServiceTest {
 
-    private final AuthorizationRequestService authorizationRequestService;
+    private final AuthorizationTransactionService authorizationTransactionService;
     private final AccountRepository accountRepository;
     private final AuthorizationTransactionRepository authorizationTransactionRepository;
     private final MerchantRepository merchantRepository;
     private final LockAccountService lockAccountService;
 
-    AuthorizationRequestServiceTest() {
+    AuthorizationTransactionServiceTest() {
         this.accountRepository = mock(AccountRepository.class);
         this.authorizationTransactionRepository = mock(AuthorizationTransactionRepository.class);
         this.merchantRepository = mock(MerchantRepository.class);
         this.lockAccountService = mock(LockAccountService.class);
-        this.authorizationRequestService = new AuthorizationRequestService(accountRepository, authorizationTransactionRepository, merchantRepository, lockAccountService);
+        this.authorizationTransactionService = new AuthorizationTransactionService(accountRepository, authorizationTransactionRepository, merchantRepository, lockAccountService);
     }
 
     @Test
@@ -45,7 +45,7 @@ class AuthorizationRequestServiceTest {
 
         when(accountRepository.findById("1")).thenReturn(Optional.empty());
         // Should throw unprocessable request exception
-        assertThrows(UnprocessableRequestException.class, () -> authorizationRequestService.process(transaction));
+        assertThrows(UnprocessableRequestException.class, () -> authorizationTransactionService.process(transaction));
     }
 
     @Test
@@ -75,11 +75,11 @@ class AuthorizationRequestServiceTest {
         when(accountRepository.findById("1")).thenReturn(Optional.of(account1));
         doNothing().when(lockAccountService).lockAccount("1");
 
-        authorizationRequestService.process(transaction1);
+        authorizationTransactionService.process(transaction1);
         verify(lockAccountService, times(1)).getAccountLockStatus("1");
         verify(lockAccountService, times(1)).lockAccount("1");
 
         when(lockAccountService.getAccountLockStatus("1")).thenReturn(Optional.of(true));
-        assertThrows(UnprocessableRequestException.class, () -> authorizationRequestService.process(transaction2));
+        assertThrows(UnprocessableRequestException.class, () -> authorizationTransactionService.process(transaction2));
     }
 }

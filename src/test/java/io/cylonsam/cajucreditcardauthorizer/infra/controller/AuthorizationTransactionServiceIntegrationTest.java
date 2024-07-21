@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class AuthorizationRequestServiceIntegrationTest extends BaseIntegrationTest {
+public class AuthorizationTransactionServiceIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private AccountRepository accountRepository;
     @Autowired

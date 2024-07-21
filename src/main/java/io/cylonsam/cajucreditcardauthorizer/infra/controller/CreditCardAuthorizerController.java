@@ -1,6 +1,6 @@
 package io.cylonsam.cajucreditcardauthorizer.infra.controller;
 
-import io.cylonsam.cajucreditcardauthorizer.core.service.AuthorizationRequestService;
+import io.cylonsam.cajucreditcardauthorizer.core.service.AuthorizationTransactionService;
 import io.cylonsam.cajucreditcardauthorizer.infra.controller.dto.AuthorizationRequestDTO;
 import io.cylonsam.cajucreditcardauthorizer.infra.controller.dto.AuthorizationResponseDTO;
 import org.springframework.http.HttpStatus;
@@ -13,16 +13,16 @@ import static io.cylonsam.cajucreditcardauthorizer.infra.controller.RequestValid
 
 @RestController
 public class CreditCardAuthorizerController {
-    private final AuthorizationRequestService authorizationRequestService;
+    private final AuthorizationTransactionService authorizationTransactionService;
 
-    public CreditCardAuthorizerController(final AuthorizationRequestService authorizationRequestService) {
-        this.authorizationRequestService = authorizationRequestService;
+    public CreditCardAuthorizerController(final AuthorizationTransactionService authorizationTransactionService) {
+        this.authorizationTransactionService = authorizationTransactionService;
     }
 
     @PostMapping("/authorize")
     public ResponseEntity<AuthorizationResponseDTO> authorize(@RequestBody final AuthorizationRequestDTO authorizationRequestDTO) {
         validate(authorizationRequestDTO);
-        authorizationRequestService.process(authorizationRequestDTO.toAuthorizationRequest());
+        authorizationTransactionService.process(authorizationRequestDTO.toAuthorizationRequest());
         return new ResponseEntity<>(new AuthorizationResponseDTO("00"), HttpStatus.OK);
     }
 }

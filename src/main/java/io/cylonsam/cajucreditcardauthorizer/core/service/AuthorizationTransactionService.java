@@ -6,6 +6,7 @@ import io.cylonsam.cajucreditcardauthorizer.core.exception.UnprocessableRequestE
 import io.cylonsam.cajucreditcardauthorizer.infra.repository.AccountRepository;
 import io.cylonsam.cajucreditcardauthorizer.infra.repository.AuthorizationTransactionRepository;
 import io.cylonsam.cajucreditcardauthorizer.infra.repository.MerchantRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -13,17 +14,18 @@ import java.util.Optional;
 import static io.cylonsam.cajucreditcardauthorizer.core.domain.TransactionClassification.CASH;
 import static io.cylonsam.cajucreditcardauthorizer.core.domain.TransactionClassification.getClassification;
 
+@Slf4j
 @Service
-public class AuthorizationRequestService {
+public class AuthorizationTransactionService {
     private final AccountRepository accountRepository;
     private final AuthorizationTransactionRepository transactionRepository;
     private final MerchantRepository merchantRepository;
     private final LockAccountService lockAccountService;
 
-    public AuthorizationRequestService(final AccountRepository accountRepository,
-                                       final AuthorizationTransactionRepository transactionRepository,
-                                       final MerchantRepository merchantRepository,
-                                       final LockAccountService lockAccountService) {
+    public AuthorizationTransactionService(final AccountRepository accountRepository,
+                                           final AuthorizationTransactionRepository transactionRepository,
+                                           final MerchantRepository merchantRepository,
+                                           final LockAccountService lockAccountService) {
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
         this.merchantRepository = merchantRepository;
@@ -31,14 +33,17 @@ public class AuthorizationRequestService {
     }
 
     public void process(final AuthorizationTransaction authorizationTransaction) {
+        log.info("Processing transaction for account {}", authorizationTransaction.getAccountId());
         final String accountId = authorizationTransaction.getAccountId();
 
         final Optional<Account> transactionAccount = accountRepository.findById(accountId);
         if (transactionAccount.isEmpty()) {
+            log.warn("Account {} not found", accountId);
             throw new UnprocessableRequestException("Account %s not found".formatted(accountId));
         }
         if (lockAccountService.getAccountLockStatus(accountId).isPresent()) {
-            throw new UnprocessableRequestException("Account %s is processing another request".formatted(accountId));
+            log.warn("Account {} is being used by another transaction", accountId);
+            throw new UnprocessableRequestException("Account %s is being used by another transaction".formatted(accountId));
         }
         lockAccountService.lockAccount(authorizationTransaction.getAccountId());
 
@@ -51,6 +56,7 @@ public class AuthorizationRequestService {
         transactionRepository.save(createTransaction(updatedAccount, authorizationTransaction));
 
         lockAccountService.unlockAccount(authorizationTransaction.getAccountId());
+        log.info("Transaction processed successfully for account {}", authorizationTransaction.getAccountId());
     }
 
     private Account debitAccount(final Account account, final AuthorizationTransaction authorizationTransaction) {
@@ -71,6 +77,7 @@ public class AuthorizationRequestService {
             return account;
         }
 
+        log.warn("Insufficient balance for account {}", account.getId());
         throw new InsufficientBalanceException();
     }
 
